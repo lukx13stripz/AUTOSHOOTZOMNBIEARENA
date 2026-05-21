@@ -1,0 +1,57 @@
+local Rayfield = loadstring(game:HttpGet('https://sirius.menu/rayfield'))()
+local Player = game.Players.LocalPlayer
+local Mouse = Player:GetMouse()
+
+local Window = Rayfield:CreateWindow({
+   Name = "13ST CRIPZ | Zombie Arena",
+   Theme = "DarkBlue",
+})
+
+local MainTab = Window:CreateTab("Main", "crosshair")
+
+-- // AUTO GUN FEATURE
+MainTab:CreateToggle({
+   Name = "Auto Shoot Gun",
+   CurrentValue = false,
+   Callback = function(Value)
+      _G.AutoShoot = Value
+      spawn(function()
+         while _G.AutoShoot do
+            task.wait(0.1) -- Bilis ng putok (adjust mo kung kailangan mas mabilis)
+            local Tool = Player.Character and Player.Character:FindFirstChildOfClass("Tool")
+            
+            -- I-check kung may hawak na baril at kung may remote event para sa pagpaputok
+            if Tool then
+               -- Option A: Pag-click ng mouse (gumagana sa karamihan ng baril)
+               mouse1click() 
+               
+               -- Option B: Kung ang baril ay gumagamit ng RemoteEvent (mas accurate)
+               -- Palitan ang "Shoot" sa tamang pangalan ng RemoteEvent sa loob ng gun
+               if Tool:FindFirstChild("Shoot") and Tool.Shoot:IsA("RemoteEvent") then
+                  Tool.Shoot:FireServer(Mouse.Hit.Position)
+               end
+            end
+         end
+      end)
+   end,
+})
+
+-- // AUTO KILL (Yung dating logic - back-up kung hindi gumana ang gun)
+MainTab:CreateToggle({
+   Name = "Kill All Zombies (Instant)",
+   Callback = function(Value)
+      _G.KillAll = Value
+      spawn(function()
+         while _G.KillAll do
+            task.wait(0.2)
+            for _, v in pairs(workspace.Zombies:GetChildren()) do
+               if v:FindFirstChild("Humanoid") and v.Humanoid.Health > 0 then
+                  v.Humanoid.Health = 0
+               end
+            end
+         end
+      end)
+   end,
+})
+
+Rayfield:Load()
